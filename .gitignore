@@ -56,3 +56,4 @@ android/key.properties
 
 # IntelliJ
 out/
+.flutter-plugins-dependencies
