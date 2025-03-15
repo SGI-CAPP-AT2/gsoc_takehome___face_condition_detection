@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:face_condition_detection/utils/label_utils.dart';
 import 'package:flutter/material.dart';
 import 'package:face_condition_detection/service/detector.dart';
 import 'package:camera/camera.dart';
@@ -37,7 +38,7 @@ class _CameraWidgetState extends State<CameraWidget>
             _detector = instance;
             _subscription = instance.resultsStream.stream.listen((values) {
               setState(() {
-                text = values["prediction"];
+                text = getEmojiFromLabel(values["prediction"]);
               });
             });
           })
