@@ -1,4 +1,7 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:face_condition_detection/service/detector.dart';
 import 'package:camera/camera.dart';
 
 class CameraWidget extends StatefulWidget {
@@ -11,15 +14,34 @@ class CameraWidget extends StatefulWidget {
   _CameraWidgetState createState() => _CameraWidgetState();
 }
 
-class _CameraWidgetState extends State<CameraWidget> {
+class _CameraWidgetState extends State<CameraWidget>
+    with WidgetsBindingObserver, SingleTickerProviderStateMixin {
   CameraController? _controller;
   List<CameraDescription>? _cameras;
+  String text = "";
   int _selectedCameraIndex = 0;
+  int frameCount = 0;
+  Detector? _detector;
+  StreamSubscription? _subscription;
 
   @override
   void initState() {
     super.initState();
-    _initializeCamera(widget.cameraIndex);
+    _initStateAsync();
+  }
+
+  void _initStateAsync() async {
+    _initializeCamera(_selectedCameraIndex);
+    Detector.start().then((instance) => {
+          setState(() {
+            _detector = instance;
+            _subscription = instance.resultsStream.stream.listen((values) {
+              setState(() {
+                text = values["prediction"];
+              });
+            });
+          })
+        });
   }
 
   Future<void> _initializeCamera(int index) async {
@@ -52,8 +74,10 @@ class _CameraWidgetState extends State<CameraWidget> {
         _controller = CameraController(backCamera, ResolutionPreset.medium);
         _selectedCameraIndex = 0;
       }
-
-      await _controller!.initialize();
+      await _controller!.initialize().then((_) async {
+        await _controller!.startImageStream(onLatestImageAvailable);
+        setState(() {});
+      });
       setState(() {});
     } on CameraException catch (e) {
       debugPrint("Camera initialization error: ${e.code} - ${e.description}");
@@ -95,7 +119,7 @@ class _CameraWidgetState extends State<CameraWidget> {
                   shape: BoxShape.circle, color: Color.fromARGB(66, 0, 0, 0)),
               child: Center(
                 child: Text(
-                  widget.text,
+                  text,
                   style: TextStyle(color: Colors.white, fontSize: 70),
                 ),
               ),
@@ -104,6 +128,30 @@ class _CameraWidgetState extends State<CameraWidget> {
         ],
       ),
     );
+  }
+
+  /// Callback to receive each fram [CameraImage] perform inference on it
+  void onLatestImageAvailable(CameraImage cameraImage) async {
+    frameCount++;
+    if (frameCount % 10 == 0) {
+      frameCount = 0;
+      _detector?.processFrame(cameraImage);
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) async {
+    switch (state) {
+      case AppLifecycleState.paused:
+        _controller?.stopImageStream();
+        _detector?.stop();
+        _subscription?.cancel();
+        break;
+      case AppLifecycleState.resumed:
+        _initStateAsync();
+        break;
+      default:
+    }
   }
 
   Widget cameraWidget(BuildContext context) {

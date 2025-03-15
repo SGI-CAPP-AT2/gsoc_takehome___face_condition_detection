@@ -11,6 +11,9 @@ dependencies:
   camera: ^0.10.5+9
   tflite_flutter: ^0.10.4
   cupertino_icons: ^1.0.8
+  image: ^4.1.7
+  exif: ^3.3.0
+  permission_handler: ^11.3.0
 
 dev_dependencies:
   flutter_test:
