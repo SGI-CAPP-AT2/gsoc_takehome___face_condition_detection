@@ -211,7 +211,7 @@ class _DetectorServer {
     final input = [imageMatrix];
 
     final output = {
-      0: [List<num>.filled(6, 0)],
+      0: [List<num>.filled(2, 0)],
     };
 
     _interpreter!.runForMultipleInputs([input], output);
@@ -221,8 +221,6 @@ class _DetectorServer {
   String getPredictionLabel(List<double> probabilities) {
     final maxIndex =
         probabilities.indexWhere((p) => p == probabilities.reduce(max));
-    return _labels![maxIndex]
-        .toString()
-        .split(' ')[1]; // Map index to corresponding label
+    return _labels![maxIndex].toString().split(' ')[1];
   }
 }

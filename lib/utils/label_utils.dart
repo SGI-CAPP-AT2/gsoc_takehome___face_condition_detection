@@ -1,11 +1,4 @@
 String getEmojiFromLabel(String label) {
-  Map<String, String> labToEm = {
-    "Angry": "😡",
-    "Disgust": "🤢",
-    "Fear": "😨",
-    "Surprised": "😮",
-    "Happy": "😀",
-    "Sad": "😟"
-  };
+  Map<String, String> labToEm = {"Happy": "😀", "Sad": "😟"};
   return labToEm[label] ?? "🚫";
 }
