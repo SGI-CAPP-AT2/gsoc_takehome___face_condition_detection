@@ -179,3 +179,57 @@ Future<void> saveImage(
   final fileOnDevice = File('$path/$name.jpg');
   await fileOnDevice.writeAsBytes(bytes, flush: true);
 }
+
+image_lib.Image cropCenter(image_lib.Image src, int targetSize) {
+  int x = (src.width - targetSize) ~/ 2;
+  int y = (src.height - targetSize) ~/ 2;
+
+  // Ensure cropping coordinates are within bounds
+  x = x < 0 ? 0 : x;
+  y = y < 0 ? 0 : y;
+
+  return image_lib.copyCrop(
+    src,
+    x: x,
+    y: y,
+    width: targetSize,
+    height: targetSize,
+  );
+}
+
+double calculateAverageBrightness(image_lib.Image src) {
+  int totalBrightness = 0;
+  int totalPixels = src.width * src.height;
+
+  for (int y = 0; y < src.height; y++) {
+    for (int x = 0; x < src.width; x++) {
+      final pixel = src.getPixel(x, y);
+      final r = pixel.r;
+      final g = pixel.g;
+      final b = pixel.b;
+
+      totalBrightness += (0.299 * r + 0.587 * g + 0.114 * b).toInt();
+    }
+  }
+
+  return totalBrightness / totalPixels;
+}
+
+image_lib.Image autoGammaCorrection(image_lib.Image src) {
+  final avgBrightness = calculateAverageBrightness(src);
+
+  const double darkThreshold = 50.0; // Too dark
+  const double brightThreshold = 200.0; // Too bright
+
+  double gamma;
+
+  if (avgBrightness < darkThreshold) {
+    gamma = 2.2;
+  } else if (avgBrightness > brightThreshold) {
+    gamma = 0.7;
+  } else {
+    gamma = 1.0;
+  }
+
+  return image_lib.adjustColor(src, gamma: gamma);
+}

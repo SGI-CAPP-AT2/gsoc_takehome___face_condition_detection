@@ -162,12 +162,10 @@ class _DetectorServer {
 
     var preProcessStart = DateTime.now().millisecondsSinceEpoch;
 
-    final imageInput = image_lib.copyResize(
-      image!,
-      width: mlModelInputSize,
-      height: mlModelInputSize,
-    );
-
+    var imageInput = cropCenter(image!, mlModelInputSize);
+    imageInput = autoGammaCorrection(imageInput);
+    debugPrint(
+        "Image dimensions: ${image.width} x ${image.height} to ${imageInput.width} x ${imageInput.height}");
     final imageMatrix = List.generate(
       imageInput.height,
       (y) => List.generate(

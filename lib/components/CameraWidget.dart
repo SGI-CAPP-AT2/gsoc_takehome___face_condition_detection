@@ -109,7 +109,22 @@ class _CameraWidgetState extends State<CameraWidget>
           else
             Center(child: Text("Loading Camera...")),
 
-          // Circular Widget Overlay
+          // Central Square Overlay
+          Positioned(
+            top: MediaQuery.of(context).size.height / 2 -
+                150, // Center vertically
+            left: MediaQuery.of(context).size.width / 2 -
+                150, // Center horizontally
+            child: Container(
+              width: 300, // Updated to 300
+              height: 300, // Updated to 300
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.red, width: 3),
+                color: Colors.transparent,
+              ),
+            ),
+          ),
+          // Circular Widget Overlay for Prediction
           Positioned(
             bottom: 50.0,
             left: MediaQuery.of(context).size.width / 2 - 50,
